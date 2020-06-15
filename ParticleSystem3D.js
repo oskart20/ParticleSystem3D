@@ -1,7 +1,7 @@
-var eps = 100;
-var gam = 100;
+const eps = 100;
+const gam = 100;
 let particles = [];
-var bounds = 500;  // default value: 500
+const bounds = 500;  // default value: 500
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
@@ -15,7 +15,7 @@ function setup() {
   
   // creates {num} particles; if num mod 3 = 0, number of Protons, Electrons and Neutrons is equal
   let num = 60;  // num should be appropriate to value of bounds
-  for (var i = 0; i < num; i += 3) {
+  for (let i = 0; i < num; i += 3) {
     particles[i] = new Proton(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2));
     particles[i+1] = new Electron(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2));
     particles[i+2] = new Neutron(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2));
