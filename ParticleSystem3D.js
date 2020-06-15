@@ -1,29 +1,35 @@
-const eps = 100;
-const gam = 100;
+let eps;
+let gam;
+
 let particles = [];
-const bounds = 500;  // default value: 500
+const bounds = 600;  // default value: 500
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
-  frameRate(60);
+  frameRate(24);
   background(55);
   
-  //let p = new Proton(0, 20, 0, 0, 0);
-  //let e = new Electron(0, 0, 240, 0, 0);
-  //let n = new Neutron(0, -20, -240, 0, 0);
-  //particles = [p, e, n];
+  eps = pow(10, 18);
+  gam = pow(10, -18);
+    
+  // creates {num} particles, num should be appropriate to value of bounds
+  let numP = 50;
+  let numE = 60;
+  let numN = 10;
   
-  // creates {num} particles; if num mod 3 = 0, number of Protons, Electrons and Neutrons is equal
-  let num = 60;  // num should be appropriate to value of bounds
-  for (let i = 0; i < num; i += 3) {
-    particles[i] = new Proton(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2));
-    particles[i+1] = new Electron(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2));
-    particles[i+2] = new Neutron(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2));
+  for (let i = 0; i < numP; i += 1) {
+    particles.push(new Proton(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), 0, 0, 0));
+  }
+  for (let j = 0; j < numE; j += 1) {
+    particles.push(new Electron(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), 0, 0, 0));
+  }
+  for (let k = 0; k < numN; k += 1) {
+    particles.push(new Neutron(random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-(bounds/2) + 15, (bounds/2) -15), random(-2, 2), random(-2, 2), random(-2, 2)));
   }
 }
 
 function draw() {
-  background(55);
+  background(200);
   orbitControl();
   
   ambientLight(255);
@@ -35,25 +41,34 @@ function draw() {
   push();
   box(bounds, bounds, bounds);
   pop();
+  
   for (let part of particles) {
     part.accelerate();
     part.move();
     part.detection();
     part.display();
-    for (let other of particles){
+    let sum = createVector(0, 0, 0);
+    for (let other of particles) {
       if (part != other) {
-        part.setAcceleration(force(part, other));
+        sum.add(force(part, other));
       }
     }
+    part.setAcceleration(sum);
   }
 }
 
 function force(a, b) {
   let d = a.P.dist(b.P);
   if (d == 0) {
-    d = 0.01;
+    d = 0.0001;
   }
   let F = createVector(b.P.x - a.P.x, b.P.y - a.P.y, b.P.z - a.P.z);
-  F.setMag((eps * a.q * b.q)/sq(d) + (gam * a.m * b.m)/sq(d));
+  let elF = -(eps * a.q * b.q)/sq(d);  // electro-magnetic force
+  let gF = (gam * a.m * b.m)/sq(d);    // gravitational force
+  let sF = 0;                          // strong force
+  if(a.q != -1 && b.q != -1 && d < 15){
+    sF = (137*eps)/sq(d);
+  }
+  F.setMag(elF + gF + sF);
   return F;
 }
